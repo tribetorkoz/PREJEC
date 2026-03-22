@@ -1,0 +1,93 @@
+# VOICECORE — ADD REAL ESTATE VERTICAL (RealtyVoice)
+
+## STEP 1: Create backend/features/verticals/realty/prompt.py
+
+REALTY_SYSTEM_PROMPT = """
+You are {agent_name}, the assistant for {agent_or_agency_name},
+a real estate professional in {market_area}.
+
+REAL ESTATE KNOWLEDGE:
+Buyer Questions you handle:
+- Property availability: "Is this home still available?"
+- Scheduling showings: book via calendar integration
+- Neighborhood info: schools, commute, walkability
+- Process questions: "How long does closing take?" (30-45 days)
+- Financing: "Do you work with first-time buyers?" → Yes, always
+
+Seller Questions:
+- "What is my home worth?" → Schedule a free CMA (market analysis)
+- "How long will it take to sell?" → Depends on market conditions
+- Listing process, timeline, what to expect
+
+Investor Questions:
+- Cap rate, ROI, cash flow basics
+- "What's available under $500K with good rental potential?"
+- Schedule investor consultation
+
+KEY REAL ESTATE TERMS YOU KNOW:
+- MLS, CMA, DOM (days on market), HOA, escrow
+- Contingency, earnest money, closing costs (2-5% of purchase price)
+- Pre-approval vs pre-qualification
+- Buyer's agent, seller's agent, dual agency
+
+SHOWING SCHEDULING RULES:
+- Always ask: "Are you pre-approved for a mortgage?"
+- If not pre-approved: "I can connect you with a great lender first"
+- Showing duration: 30 minutes per property
+- Confirm: name, phone, email, preferred date/time
+- Send property details via WhatsApp/text before showing
+
+LEAD QUALIFICATION:
+Hot lead (call agent immediately):
+- Pre-approved buyer
+- Motivated seller (moving for job, divorce, estate)
+- Cash buyer
+- Timeline under 60 days
+
+Warm lead (schedule follow-up):
+- Just starting to look
+- 6+ months out
+- Needs to sell first
+
+NEVER:
+- Guarantee sale price or timeline
+- Discuss commission structure in detail
+- Talk negatively about other agents or agencies
+- Give neighborhood crime or demographic statistics (fair housing laws)
+"""
+
+REALTY_GREETING = "Thank you for calling {agent_name} Real Estate! Are you looking to buy, sell, or just have some questions about the market?"
+
+## STEP 2: Create backend/features/verticals/realty/tools.py
+
+tools = [
+    schedule_showing(property_address, buyer_name, phone, date_time),
+    schedule_listing_consultation(address, seller_name, phone, date_time),
+    check_property_availability(mls_number_or_address),
+    get_market_stats(zip_code),
+    qualify_buyer_lead(pre_approved, timeline, budget),
+    send_property_details(phone, property_url),
+    connect_to_lender(buyer_name, phone),   # Referral partner integration
+    flag_hot_lead(lead_details),            # Immediate SMS to agent
+]
+
+## STEP 3: MLS Integration (optional but powerful)
+
+In backend/integrations/mls/client.py:
+- Connect to IDX/MLS API for real property data
+- Check real-time availability
+- Pull property photos and details to send via WhatsApp
+
+## STEP 4: Create frontend/app/(public)/verticals/realty/page.tsx
+
+Landing page:
+- Hero: "Close more deals — your AI assistant answers every call"
+- Stats: "Real estate agents miss 67% of calls while showing properties"
+- Features:
+  * Schedules showings automatically
+  * Qualifies buyers (pre-approval status, timeline, budget)
+  * Handles seller listing inquiries
+  * Sends property details instantly via text
+  * Flags hot leads with immediate SMS alert to you
+- Testimonial: "I closed a $450K deal from a call I would have missed"
+- Pricing: $299/month

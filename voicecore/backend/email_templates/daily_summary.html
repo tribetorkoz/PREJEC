@@ -1,0 +1,60 @@
+<div>
+    <h1 style="color: #F59E0B; font-size: 24px; margin: 0 0 5px 0;">
+        📊 Daily Summary
+    </h1>
+    <p style="color: #71717A; font-size: 14px; margin: 0 0 20px 0;">
+        {{ date }} - {{ company_name }}
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid #27272A; margin: 20px 0;">
+    
+    <!-- KPI Cards -->
+    <table role="presentation" cellspacing="0" cellpadding="0" style="width: 100%; margin-bottom: 20px;">
+        <tr>
+            <td style="width: 50%; padding: 8px;">
+                <div style="background-color: #27272A; padding: 15px; border-radius: 8px; text-align: center;">
+                    <p style="color: #F59E0B; font-size: 28px; margin: 0;">{{ total_calls }}</p>
+                    <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Total Calls</p>
+                </div>
+            </td>
+            <td style="width: 50%; padding: 8px;">
+                <div style="background-color: #27272A; padding: 15px; border-radius: 8px; text-align: center;">
+                    <p style="color: #F59E0B; font-size: 28px; margin: 0;">{{ total_duration }}</p>
+                    <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Minutes</p>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 50%; padding: 8px;">
+                <div style="background-color: #27272A; padding: 15px; border-radius: 8px; text-align: center;">
+                    <p style="color: #EF4444; font-size: 28px; margin: 0;">{{ missed_calls }}</p>
+                    <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Missed</p>
+                </div>
+            </td>
+            <td style="width: 50%; padding: 8px;">
+                <div style="background-color: #27272A; padding: 15px; border-radius: 8px; text-align: center;">
+                    <p style="color: #22C55E; font-size: 28px; margin: 0;">{{ appointments_booked }}</p>
+                    <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Appointments</p>
+                </div>
+            </td>
+        </tr>
+    </table>
+    
+    <!-- Sentiment Score -->
+    <div style="background-color: #27272A; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="color: #FFFFFF; margin: 0 0 10px 0;">
+            <strong>Sentiment Score: {{ avg_sentiment }}%</strong>
+        </p>
+        <div style="background-color: #3F3F46; height: 8px; border-radius: 4px;">
+            <div style="background-color: {% if avg_sentiment >= 70 %}#22C55E{% elif avg_sentiment >= 40 %}#F59E0B{% else %}#EF4444{% endif %}; height: 8px; border-radius: 4px; width: {{ avg_sentiment }}%;"></div>
+        </div>
+    </div>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+        <tr>
+            <td style="background-color: #F59E0B; border-radius: 8px;">
+                <a href="{{ dashboard_url }}" style="display: inline-block; color: #000; font-size: 14px; font-weight: bold; padding: 15px 30px; text-decoration: none;">View Full Dashboard</a>
+            </td>
+        </tr>
+    </table>
+</div>

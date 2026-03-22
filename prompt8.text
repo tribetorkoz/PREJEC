@@ -1,0 +1,754 @@
+# PROMPT 8 — VoiceCore Full Code Audit & Consistency Check
+
+> **Give this prompt to your AI coding agent AFTER completing all 7 prompts.**
+> This prompt audits every file, checks all connections, and fixes all errors.
+
+---
+
+## OBJECTIVE
+
+You are a senior software engineer performing a full code audit on the VoiceCore project.
+Your job is to verify that ALL 7 prompts were implemented correctly, everything is connected,
+no files are missing, no errors exist, and the project is 100% production-ready.
+
+**Go through every phase below in order. Fix every issue you find. Do not skip anything.**
+
+---
+
+## PHASE 1 — File Structure Verification
+
+### Task 1.1 — Verify all folders and files exist
+
+Run this command and confirm every file exists:
+
+```bash
+find voicecore/ -type f -name "*.py" -o -name "*.ts" -o -name "*.tsx" -o -name "*.json" -o -name "*.yml" | sort
+```
+
+**Required files checklist — confirm each one exists:**
+
+#### Backend (Python)
+- [ ] `backend/main.py`
+- [ ] `backend/config.py`
+- [ ] `backend/requirements.txt`
+- [ ] `backend/agents/voice_agent.py`
+- [ ] `backend/agents/system_prompt.py`
+- [ ] `backend/agents/tools.py`
+- [ ] `backend/api/auth.py`
+- [ ] `backend/api/calls.py`
+- [ ] `backend/api/agents.py`
+- [ ] `backend/api/analytics.py`
+- [ ] `backend/api/billing.py`
+- [ ] `backend/api/admin.py`
+- [ ] `backend/api/webhooks.py`
+- [ ] `backend/db/models.py`
+- [ ] `backend/db/database.py`
+- [ ] `backend/db/schemas.py`
+- [ ] `backend/services/twilio_service.py`
+- [ ] `backend/services/whatsapp_service.py`
+- [ ] `backend/services/stripe_service.py`
+
+#### Frontend (TypeScript / React)
+- [ ] `frontend/app/page.tsx`
+- [ ] `frontend/app/(auth)/login/page.tsx`
+- [ ] `frontend/app/(auth)/signup/page.tsx`
+- [ ] `frontend/app/onboarding/page.tsx`
+- [ ] `frontend/app/dashboard/page.tsx`
+- [ ] `frontend/app/dashboard/calls/page.tsx`
+- [ ] `frontend/app/dashboard/analytics/page.tsx`
+- [ ] `frontend/app/dashboard/agent/page.tsx`
+- [ ] `frontend/app/dashboard/settings/page.tsx`
+- [ ] `frontend/app/super-admin/[...path]/page.tsx`
+- [ ] `frontend/lib/auth.ts`
+- [ ] `frontend/lib/api.ts`
+- [ ] `frontend/package.json`
+- [ ] `frontend/tailwind.config.ts`
+- [ ] `frontend/next.config.ts`
+
+#### Infrastructure
+- [ ] `docker-compose.yml`
+- [ ] `Dockerfile.backend`
+- [ ] `Dockerfile.frontend`
+- [ ] `.env.example`
+- [ ] `README.md`
+
+**ACTION:** If any file is missing, create it now with the correct content.
+
+---
+
+### Task 1.2 — Verify .env.example has all variables
+
+Open `.env.example` and confirm ALL of these variables are present:
+
+```
+DEEPGRAM_API_KEY
+ELEVENLABS_API_KEY
+ANTHROPIC_API_KEY
+TWILIO_ACCOUNT_SID
+TWILIO_AUTH_TOKEN
+TWILIO_PHONE_NUMBER
+LIVEKIT_URL
+LIVEKIT_API_KEY
+LIVEKIT_API_SECRET
+DATABASE_URL
+REDIS_URL
+STRIPE_SECRET_KEY
+STRIPE_WEBHOOK_SECRET
+STRIPE_STARTER_PRICE_ID
+STRIPE_BUSINESS_PRICE_ID
+JWT_SECRET
+JWT_ALGORITHM
+ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+SENDGRID_API_KEY
+FROM_EMAIL
+ADMIN_SECRET_SLUG
+FRONTEND_URL
+NEXT_PUBLIC_API_URL
+NEXTAUTH_URL
+NEXTAUTH_SECRET
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+```
+
+**ACTION:** Add any missing variable to `.env.example` with an empty value and a comment explaining it.
+
+---
+
+## PHASE 2 — Backend Python Audit
+
+### Task 2.1 — Syntax check all Python files
+
+```bash
+cd backend
+python -m py_compile main.py config.py
+python -m py_compile agents/voice_agent.py agents/system_prompt.py agents/tools.py
+python -m py_compile api/auth.py api/calls.py api/agents.py api/analytics.py
+python -m py_compile api/billing.py api/admin.py api/webhooks.py
+python -m py_compile db/models.py db/database.py db/schemas.py
+python -m py_compile services/twilio_service.py services/whatsapp_service.py services/stripe_service.py
+```
+
+**ACTION:** Fix every syntax error reported.
+
+---
+
+### Task 2.2 — Verify FastAPI routers are registered in main.py
+
+Open `backend/main.py` and confirm ALL routers are imported and included:
+
+```python
+# These MUST all be present in main.py:
+from api.auth import router as auth_router
+from api.calls import router as calls_router
+from api.agents import router as agents_router
+from api.analytics import router as analytics_router
+from api.billing import router as billing_router
+from api.admin import router as admin_router
+from api.webhooks import router as webhooks_router
+
+app.include_router(auth_router, prefix="/api/auth")
+app.include_router(calls_router, prefix="/api/calls")
+app.include_router(agents_router, prefix="/api/agents")
+app.include_router(analytics_router, prefix="/api/analytics")
+app.include_router(billing_router, prefix="/api/billing")
+app.include_router(admin_router, prefix="/api/admin")
+app.include_router(webhooks_router, prefix="/webhooks")
+```
+
+**ACTION:** Add any missing router imports and includes.
+
+---
+
+### Task 2.3 — Verify all database models exist and are correct
+
+Open `backend/db/models.py` and confirm these models exist with correct fields:
+
+- [ ] `Company` model — id, name, email, plan, status, stripe_customer_id, phone_number, whatsapp_number, created_at
+- [ ] `User` model — id, company_id, full_name, email, password_hash, google_id, avatar, role, created_at
+- [ ] `Agent` model — id, company_id, name, language, voice_id, system_prompt, is_active, business_hours, created_at
+- [ ] `Call` model — id, company_id, caller_phone, duration_seconds, transcript, sentiment, outcome, recording_url, created_at
+- [ ] `Customer` model — id, company_id, phone, name, notes, last_call_at, total_calls
+- [ ] `AdminLog` model — id, action, target, performed_by, ip, timestamp, details
+
+**ACTION:** Add any missing model or field.
+
+---
+
+### Task 2.4 — Verify all API endpoints exist
+
+Run this to list all registered endpoints:
+
+```bash
+cd backend
+python -c "
+from main import app
+for route in app.routes:
+    if hasattr(route, 'methods'):
+        print(route.methods, route.path)
+"
+```
+
+**Required endpoints checklist:**
+
+#### Auth endpoints
+- [ ] `POST /api/auth/register`
+- [ ] `POST /api/auth/login`
+- [ ] `POST /api/auth/google`
+- [ ] `POST /api/auth/forgot-password`
+- [ ] `POST /api/auth/reset-password`
+- [ ] `POST /api/auth/refresh`
+
+#### Public endpoints (no auth needed)
+- [ ] `GET /api/public/stats`
+- [ ] `GET /api/public/pricing`
+
+#### Call endpoints
+- [ ] `POST /api/calls/inbound`
+- [ ] `GET /api/calls/history`
+- [ ] `GET /api/calls/{id}`
+- [ ] `GET /api/calls/analytics`
+
+#### Agent endpoints
+- [ ] `GET /api/agents/{id}`
+- [ ] `PUT /api/agents/{id}`
+- [ ] `POST /api/agents/{id}/knowledge`
+- [ ] `POST /api/agents/{id}/test`
+
+#### Billing endpoints
+- [ ] `POST /api/billing/checkout`
+- [ ] `GET /api/billing/portal`
+- [ ] `GET /api/billing/subscription`
+
+#### Admin endpoints
+- [ ] `GET /api/admin/dashboard`
+- [ ] `GET /api/admin/clients`
+- [ ] `POST /api/admin/clients`
+- [ ] `PUT /api/admin/clients/{id}`
+- [ ] `POST /api/admin/clients/{id}/suspend`
+- [ ] `DELETE /api/admin/clients/{id}`
+- [ ] `GET /api/admin/calls/live`
+- [ ] `GET /api/admin/revenue`
+- [ ] `PUT /api/admin/settings/apikeys`
+- [ ] `POST /api/admin/notify`
+- [ ] `GET /api/admin/logs`
+
+#### Webhook endpoints
+- [ ] `POST /webhooks/twilio/voice`
+- [ ] `POST /webhooks/twilio/voice/status`
+- [ ] `POST /webhooks/twilio/whatsapp`
+- [ ] `POST /webhooks/stripe`
+
+#### System endpoints
+- [ ] `GET /health`
+
+**ACTION:** Create any missing endpoint.
+
+---
+
+### Task 2.5 — Verify JWT authentication middleware
+
+Open `backend/api/auth.py` and confirm:
+
+- [ ] Password hashing uses `bcrypt` with cost factor 12
+- [ ] JWT tokens use `python-jose` or `PyJWT`
+- [ ] `access_token` expires in 2 hours (120 minutes)
+- [ ] `refresh_token` expires in 30 days
+- [ ] Tokens are signed with `JWT_SECRET` from config
+- [ ] Every protected endpoint uses a `get_current_user` dependency
+- [ ] Admin endpoints use a separate `verify_admin` dependency
+- [ ] Login attempts are rate-limited (max 5 per minute per IP)
+
+**ACTION:** Fix any missing security implementation.
+
+---
+
+### Task 2.6 — Verify Pipecat voice pipeline
+
+Open `backend/agents/voice_agent.py` and confirm:
+
+- [ ] Deepgram STT is configured with `nova-2` model
+- [ ] ElevenLabs TTS is configured with `eleven_multilingual_v2`
+- [ ] Claude `claude-sonnet-4-6` is the LLM
+- [ ] LiveKit transport is set up correctly
+- [ ] `SileroVADAnalyzer` is in the pipeline
+- [ ] Interruption handling stops TTS when user speaks
+- [ ] Customer memory is loaded before each call starts
+- [ ] Emotion detection runs every 3 turns
+- [ ] All 5 function tools are registered with the LLM
+- [ ] Full transcript is saved to DB after every call
+- [ ] Fallback to Whisper if Deepgram fails
+- [ ] Fallback to GPT-4o if Claude fails
+
+**ACTION:** Add any missing pipeline component.
+
+---
+
+### Task 2.7 — Verify Twilio webhook signature validation
+
+Open `backend/api/webhooks.py` and confirm:
+
+- [ ] Every Twilio webhook validates the `X-Twilio-Signature` header
+- [ ] Uses `twilio.request_validator.RequestValidator`
+- [ ] Returns 403 if signature is invalid
+- [ ] Stripe webhook validates `stripe-signature` header
+- [ ] Uses `stripe.Webhook.construct_event()`
+
+**ACTION:** Add signature validation if missing.
+
+---
+
+## PHASE 3 — Frontend TypeScript Audit
+
+### Task 3.1 — TypeScript type check
+
+```bash
+cd frontend
+npx tsc --noEmit
+```
+
+**ACTION:** Fix every TypeScript error reported.
+
+---
+
+### Task 3.2 — Verify API client covers all endpoints
+
+Open `frontend/lib/api.ts` and confirm it has typed functions for:
+
+- [ ] `auth.register(data)`
+- [ ] `auth.login(data)`
+- [ ] `auth.googleAuth(data)`
+- [ ] `calls.list(filters)`
+- [ ] `calls.get(id)`
+- [ ] `calls.getAnalytics()`
+- [ ] `agents.get(id)`
+- [ ] `agents.update(id, data)`
+- [ ] `agents.uploadKnowledge(id, files)`
+- [ ] `billing.createCheckout(plan)`
+- [ ] `billing.getPortal()`
+- [ ] `public.getStats()`
+- [ ] `public.getPricing()`
+
+**ACTION:** Add any missing API function with correct TypeScript types.
+
+---
+
+### Task 3.3 — Verify NextAuth configuration
+
+Open `frontend/lib/auth.ts` and confirm:
+
+- [ ] `GoogleProvider` is configured with env vars
+- [ ] `CredentialsProvider` calls `POST /api/auth/login`
+- [ ] `signIn` callback posts to `POST /api/auth/google` for Google logins
+- [ ] `jwt` callback stores `accessToken` in token
+- [ ] `session` callback exposes `accessToken` to session
+- [ ] `pages.signIn` is set to `/login`
+- [ ] Session strategy is `jwt` with 2-hour maxAge
+
+**ACTION:** Fix any missing NextAuth configuration.
+
+---
+
+### Task 3.4 — Verify all pages have auth protection
+
+Check that these pages redirect to `/login` if user is not authenticated:
+
+- [ ] `app/dashboard/page.tsx` — protected
+- [ ] `app/dashboard/calls/page.tsx` — protected
+- [ ] `app/dashboard/analytics/page.tsx` — protected
+- [ ] `app/dashboard/agent/page.tsx` — protected
+- [ ] `app/dashboard/settings/page.tsx` — protected
+- [ ] `app/onboarding/page.tsx` — protected
+- [ ] `app/super-admin/[...path]/page.tsx` — admin only
+
+And these pages redirect to `/dashboard` if user IS authenticated:
+
+- [ ] `app/(auth)/login/page.tsx` — redirect if logged in
+- [ ] `app/(auth)/signup/page.tsx` — redirect if logged in
+
+**ACTION:** Add route protection using `getServerSession` or middleware.
+
+---
+
+### Task 3.5 — Verify all dashboard pages fetch real data
+
+Check each dashboard page:
+
+- [ ] `dashboard/page.tsx` — fetches from `/api/calls/analytics` and `/api/agents/{id}`
+- [ ] `dashboard/calls/page.tsx` — fetches from `/api/calls/history` with pagination
+- [ ] `dashboard/analytics/page.tsx` — fetches chart data from backend
+- [ ] `dashboard/agent/page.tsx` — fetches agent config and saves changes
+- [ ] `dashboard/settings/page.tsx` — fetches and updates company info
+
+**ACTION:** Replace any hardcoded data with real API calls.
+
+---
+
+### Task 3.6 — Verify landing page is fully English
+
+Open `frontend/app/page.tsx` and scan for any non-English text:
+
+```bash
+grep -n "[^\x00-\x7F]" frontend/app/page.tsx
+```
+
+**ACTION:** Replace any Arabic or non-English text with English equivalents.
+
+Also verify all other frontend files are English only:
+
+```bash
+grep -rn "[^\x00-\x7F]" frontend/app/ --include="*.tsx" --include="*.ts"
+```
+
+**ACTION:** Fix any non-English text found anywhere in the frontend.
+
+---
+
+## PHASE 4 — Integration Testing
+
+### Task 4.1 — Start all services
+
+```bash
+docker-compose up -d
+sleep 10
+```
+
+Verify all containers are running:
+
+```bash
+docker-compose ps
+```
+
+- [ ] `backend` container is running on port 8000
+- [ ] `frontend` container is running on port 3000
+- [ ] `postgres` container is running on port 5432
+- [ ] `redis` container is running on port 6379
+
+**ACTION:** Fix any container that fails to start.
+
+---
+
+### Task 4.2 — Test health endpoint
+
+```bash
+curl http://localhost:8000/health
+```
+
+Expected response:
+```json
+{"status": "ok", "version": "1.0.0", "timestamp": "..."}
+```
+
+**ACTION:** Fix if health endpoint returns an error.
+
+---
+
+### Task 4.3 — Test user registration flow
+
+```bash
+curl -X POST http://localhost:8000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "company_name": "Test Company",
+    "full_name": "John Smith",
+    "email": "test@example.com",
+    "password": "TestPass123!",
+    "phone": "+1234567890",
+    "industry": "Healthcare",
+    "plan": "starter"
+  }'
+```
+
+Expected: `201` status with `access_token` in response
+
+**ACTION:** Fix any registration error.
+
+---
+
+### Task 4.4 — Test login flow
+
+```bash
+curl -X POST http://localhost:8000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "TestPass123!"}'
+```
+
+Expected: `200` status with `access_token` and `refresh_token`
+
+**ACTION:** Fix any login error.
+
+---
+
+### Task 4.5 — Test protected endpoint with JWT
+
+```bash
+# Use the token from step 4.4
+TOKEN="your_access_token_here"
+
+curl http://localhost:8000/api/agents/1 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Expected: `200` with agent data
+
+**ACTION:** Fix any auth middleware error.
+
+---
+
+### Task 4.6 — Test public endpoints (no auth)
+
+```bash
+curl http://localhost:8000/api/public/stats
+curl http://localhost:8000/api/public/pricing
+```
+
+Both should return `200` with JSON data.
+
+**ACTION:** Create these endpoints if they return 404.
+
+---
+
+### Task 4.7 — Test Stripe checkout creation
+
+```bash
+curl -X POST http://localhost:8000/api/billing/checkout \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"plan": "starter"}'
+```
+
+Expected: `200` with `checkout_url` pointing to Stripe
+
+**ACTION:** Fix Stripe integration if checkout fails.
+
+---
+
+### Task 4.8 — Test frontend loads
+
+```bash
+curl -s http://localhost:3000 | grep -i "VoiceCore"
+```
+
+Expected: HTML content containing "VoiceCore"
+
+```bash
+curl -s http://localhost:3000/login | grep -i "sign in"
+```
+
+Expected: HTML content containing "Sign in"
+
+**ACTION:** Fix any frontend build or routing error.
+
+---
+
+## PHASE 5 — Security Audit
+
+### Task 5.1 — Check for hardcoded secrets
+
+```bash
+grep -rn "sk_live\|sk_test\|api_key\|secret\|password\|token" \
+  backend/ frontend/ \
+  --include="*.py" --include="*.ts" --include="*.tsx" \
+  --exclude-dir=".next" \
+  --exclude-dir="node_modules" \
+  | grep -v ".env" \
+  | grep -v "os.getenv\|process.env\|config\." \
+  | grep -v "# " \
+  | grep -v "password_hash\|password_field\|test_password\|dummy"
+```
+
+**ACTION:** Move any hardcoded secrets to environment variables.
+
+---
+
+### Task 5.2 — Verify CORS is restricted
+
+Open `backend/main.py` and confirm:
+
+```python
+# MUST check for production environment
+from config import settings
+
+if settings.ENVIRONMENT == "production":
+    allow_origins = ["https://voicecore.ai"]
+else:
+    allow_origins = ["http://localhost:3000"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+```
+
+**ACTION:** Fix CORS if it allows all origins in production.
+
+---
+
+### Task 5.3 — Verify admin URL uses secret slug
+
+Open `frontend/app/super-admin/[...path]/page.tsx` and confirm:
+
+- [ ] The admin page checks `ADMIN_SECRET_SLUG` from env
+- [ ] Returns 404 if slug does not match
+- [ ] 2FA is enforced before showing any admin content
+- [ ] Admin session is separate from regular user session
+
+**ACTION:** Add security checks if missing.
+
+---
+
+### Task 5.4 — Verify tokens are in httpOnly cookies
+
+Search for any localStorage token storage:
+
+```bash
+grep -rn "localStorage.*token\|sessionStorage.*token" frontend/ \
+  --include="*.ts" --include="*.tsx"
+```
+
+Expected: Zero results.
+
+**ACTION:** Replace any localStorage token storage with httpOnly cookies.
+
+---
+
+## PHASE 6 — Code Quality Check
+
+### Task 6.1 — Run Python linter
+
+```bash
+cd backend
+pip install flake8 --break-system-packages
+flake8 . --max-line-length=120 --exclude=__pycache__
+```
+
+**ACTION:** Fix any critical errors (E and F codes). Warnings (W codes) are optional.
+
+---
+
+### Task 6.2 — Run frontend linter
+
+```bash
+cd frontend
+npm run lint
+```
+
+**ACTION:** Fix all ESLint errors. Warnings can be left.
+
+---
+
+### Task 6.3 — Check for missing error handling
+
+Search for API calls without try/catch:
+
+```bash
+grep -rn "await fetch\|await api\." frontend/ \
+  --include="*.tsx" --include="*.ts" \
+  -l
+```
+
+For each file found, verify it has proper error handling:
+- Loading state while fetching
+- Error message shown to user if request fails
+- No raw error objects shown to users
+
+**ACTION:** Add error handling to any API call that is missing it.
+
+---
+
+### Task 6.4 — Verify all async Python functions have error handling
+
+```bash
+grep -n "async def" backend/api/*.py backend/services/*.py backend/agents/*.py
+```
+
+For each async function, verify:
+- [ ] Wrapped in try/except
+- [ ] Returns proper HTTP status codes on error (400, 401, 403, 404, 500)
+- [ ] Logs errors with structlog
+
+**ACTION:** Add error handling to any function that is missing it.
+
+---
+
+## PHASE 7 — Final Verification
+
+### Task 7.1 — Complete user journey test
+
+Manually test this complete flow end-to-end:
+
+1. [ ] Open `http://localhost:3000` — landing page loads correctly
+2. [ ] Click "Start free trial" — signup page opens
+3. [ ] Fill in the signup form — account is created successfully
+4. [ ] Onboarding wizard opens — complete all 5 steps
+5. [ ] Dashboard loads — shows agent status and empty call stats
+6. [ ] Navigate to Agent page — can edit agent settings
+7. [ ] Navigate to Settings — can update company info
+8. [ ] Sign out — redirects to landing page
+9. [ ] Sign in again — redirects to dashboard
+10. [ ] Open admin URL `/super-admin/[your-slug]` — 2FA login works
+11. [ ] Admin dashboard shows all clients and revenue stats
+
+**ACTION:** Fix anything that breaks in this flow.
+
+---
+
+### Task 7.2 — Final build test
+
+```bash
+# Backend
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000 &
+sleep 3
+curl http://localhost:8000/health
+echo "Backend: OK"
+
+# Frontend
+cd frontend
+npm run build
+echo "Frontend build: OK"
+```
+
+**ACTION:** Fix any build errors.
+
+---
+
+### Task 7.3 — Create final status report
+
+After completing all phases, output a summary in this format:
+
+```
+VOICECORE — AUDIT COMPLETE
+
+PHASE 1 — File Structure:     [PASS/FAIL] (X files missing)
+PHASE 2 — Backend Python:     [PASS/FAIL] (X errors fixed)
+PHASE 3 — Frontend TypeScript: [PASS/FAIL] (X errors fixed)
+PHASE 4 — Integration Tests:  [PASS/FAIL] (X tests passed / X failed)
+PHASE 5 — Security:           [PASS/FAIL] (X issues found)
+PHASE 6 — Code Quality:       [PASS/FAIL] (X warnings)
+PHASE 7 — Final Verification: [PASS/FAIL]
+
+TOTAL ISSUES FOUND:    X
+TOTAL ISSUES FIXED:    X
+REMAINING ISSUES:      X
+
+STATUS: READY FOR DEPLOYMENT / NEEDS MORE WORK
+```
+
+---
+
+## IMPORTANT NOTES
+
+- **Do not skip any phase** — each phase depends on the previous one
+- **Fix issues immediately** — do not move to the next task with unresolved errors
+- **Test after each fix** — confirm the fix actually works before continuing
+- **English only** — if you find any non-English text in the UI, replace it immediately
+- **Security first** — never leave hardcoded secrets or missing authentication
+
+---
+
+*VoiceCore — Heard Before Seen | voicecore.ai*

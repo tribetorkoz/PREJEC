@@ -1,0 +1,95 @@
+Continue building the VoiceCore project.
+Now implement the complete voice agent engine.
+
+## FILE: backen# VOICECORE — VOICE ENGINE WITH PIPECAT
+
+d/agents/voice_agent.py
+Build the main Pipecat pipeline with:
+
+### PIPELINE COMPONENTS (in this exact order):
+1. Transport: LiveKit (for WebRTC) or WebsocketServerTransport
+2. STT: DeepgramSTTService
+   - model: nova-2
+   - language: multi (auto-detect Arabic/English/French)
+   - interim_results: True
+3. LLM: AnthropicLLMService
+   - model: claude-sonnet-4-6
+   - max_tokens: 1024
+   - system: load from system_prompt.py
+4. TTS: ElevenLabsTTSService
+   - model_id: eleven_multilingual_v2
+   - voice_id: from agent config in database
+5. VAD: SileroVADAnalyzer
+   - start_secs: 0.2
+   - stop_secs: 0.8
+
+### PIPELINE FLOW:
+transport.input() -> STT -> LLM -> TTS -> transport.output()
+
+### ADD THESE FEATURES:
+
+// 1. Customer Memory — before each call:
+async def load_customer_context(phone: str, company_id: str):
+    # Query database for this customer
+    # Return: name, previous calls count, last visit, notes
+    # Inject into system prompt
+
+// 2. Interruption Handling:
+# ALWAYS use LLMUserStopWordFrame to detect interruptions
+# Stop TTS immediately when user starts speaking
+# NEVER talk over the customer
+
+// 3. Function Calling — add these tools to LLM:
+tools = [
+    book_appointment(date, time, customer_name, phone),
+    check_availability(date),
+    save_customer_note(phone, note),
+    transfer_to_human(reason),
+    send_whatsapp_confirmation(phone, message)
+]
+
+// 4. Call Recording & Transcription:
+# Save full transcript to database after each call
+# Include: timestamps, speaker labels, sentiment score
+
+// 5. Sentiment Analysis:
+# After each LLM response, analyze customer sentiment
+# Values: POSITIVE, NEUTRAL, FRUSTRATED, ANGRY
+# Save to call record in database
+# If ANGRY for 2+ turns: auto-trigger transfer_to_human()
+
+## FILE: backend/agents/system_prompt.py
+Create a dynamic system prompt builder:
+
+def build_system_prompt(agent_config, customer_context):
+    return f'''
+    You are {agent_config.name}, voice assistant for {agent_config.company}.
+    
+    CUSTOMER CONTEXT:
+    {customer_context}
+    
+    RULES:
+    - ALWAYS respond in the same language the customer speaks
+    - NEVER speak more than 40 words at once
+    - ALWAYS confirm appointments before saving
+    - ALWAYS use customer name when known
+    - NEVER say you are an AI unless directly asked
+    - If asked directly: say you are a digital assistant
+    '''
+
+## FILE: backend/api/calls.py
+Endpoints needed:
+POST /calls/inbound       # Twilio webhook for incoming calls
+POST /calls/outbound      # Trigger outbound call
+GET  /calls/history       # Paginated call history
+GET  /calls/{id}          # Single call with transcript
+GET  /calls/analytics     # Aggregated stats
+
+## IMPORTANT REQUIREMENTS:
+- Handle concurrent calls (use asyncio properly)
+- NEVER block the event loop
+- Log every pipeline event for debugging
+- Add proper exception handling for API failures
+- If Deepgram fails: fallback to Whisper
+- If ElevenLabs fails: fallback to gTTS
+- If Claude fails: fallback to GPT-4o

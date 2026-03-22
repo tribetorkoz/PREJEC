@@ -1,0 +1,27 @@
+<div style="text-align: center;">
+    <h1 style="color: #EF4444; font-size: 24px; margin: 0 0 10px 0;">
+        ⚠️ Action Required
+    </h1>
+    <p style="color: #A1A1AA; font-size: 16px; margin: 0 0 20px 0;">Payment failed for VoiceCore</p>
+    
+    <hr style="border: none; border-top: 1px solid #27272A; margin: 20px 0;">
+    
+    <p style="color: #FFFFFF; font-size: 18px; margin: 10px 0;">
+        <strong>Amount:</strong> <span style="color: #F59E0B;">${{ "%.2f"|format(amount) }}</span>
+    </p>
+    <p style="color: #71717A; font-size: 14px; margin: 10px 0;">
+        Retry Date: {{ retry_date }}
+    </p>
+    
+    <p style="color: #A1A1AA; font-size: 14px; margin: 30px 0 0 0;">
+        Your agent will continue working for 7 more days.<br>Please update your payment method.
+    </p>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 30px auto 0;">
+        <tr>
+            <td style="background-color: #F59E0B; border-radius: 8px;">
+                <a href="{{ update_payment_url }}" style="display: inline-block; color: #000; font-size: 14px; font-weight: bold; padding: 15px 30px; text-decoration: none;">Update Payment</a>
+            </td>
+        </tr>
+    </table>
+</div>

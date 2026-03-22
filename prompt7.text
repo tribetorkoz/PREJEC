@@ -1,0 +1,115 @@
+# VOICECORE - LANDING PAGE + AUTHENTICATION
+# ALL TEXT MUST BE IN ENGLISH ONLY THROUGHOUT
+
+## LANDING PAGE: app/page.tsx
+Design: dark background #080c14, amber accents #f59e0b
+All text, buttons, labels: English only, no Arabic
+
+HERO SECTION:
+Main headline: Your business voice that never sleeps
+Subtitle: Deploy intelligent voice agents that answer every
+  customer call 24 hours a day, 7 days a week
+Primary button: Start free trial  ->  navigates to /signup
+Secondary button: See how it works  ->  smooth scroll to #how
+Animated amber sound wave: CSS bars with wave animation
+Stats row: 500+ Companies  |  2.3M+ Calls  |  99.9% Uptime  |  under 1s
+
+FEATURES SECTION (6 cards in grid layout):
+Human-quality voice: Customers cannot tell it is AI
+Phone and WhatsApp: Works on both from day one
+Customer memory: Remembers every caller and their history
+Daily reports: Transcripts and analytics every morning
+Multilingual: English Arabic French auto-detected
+CRM integration: Salesforce HubSpot Zoho out of the box
+
+HOW IT WORKS SECTION (3 numbered steps):
+Step 1: Sign up your company - takes only 5 minutes
+Step 2: We configure your voice agent - ready in 48 hours
+Step 3: Your agent starts answering calls immediately
+
+PRICING SECTION:
+Fetch live prices from API: GET /api/public/pricing
+Display 3 cards: Starter 99/mo, Business 99/mo, Enterprise custom
+Each card has Get Started button linking to /signup?plan=plan-name
+Monthly or annual billing toggle with 20% annual discount
+
+FAQ SECTION: accordion with 6 common questions and answers
+FINAL CTA: big button Start free trial linking to /signup
+FOOTER: logo, nav links, social links, legal pages, copyright
+
+## SIGN UP PAGE: app/(auth)/signup/page.tsx
+Large Google Sign Up button at the very top of the form
+Divider text: or sign up with email
+Form fields:
+  Company name (required)
+  Full name (required)
+  Work email (required, validate format)
+  Password with animated strength meter bar below field
+  Industry dropdown: Healthcare Restaurants Real Estate Legal Finance Retail Other
+  Phone number with country code selector
+  Checkbox: I agree to Terms of Service and Privacy Policy
+Pre-select plan from URL query param ?plan=starter or business
+Submit button: Create account
+
+ON SUBMIT:
+  Validate all fields with Zod schema before calling API
+  Show loading spinner and disable button during API call
+  Call: POST /api/auth/register
+  Request body: company_name, full_name, email, password, phone, industry, plan
+  On success with paid plan: redirect to Stripe checkout URL
+  On success with free plan: redirect to /onboarding
+  On error: show inline field-level error messages
+
+## SIGN IN PAGE: app/(auth)/login/page.tsx
+Google Sign In button at top
+Divider: or sign in with email
+Email input field
+Password field with show/hide toggle button
+Remember me checkbox
+Forgot password link to /forgot-password
+Sign in button
+Link: No account? Create one free -> /signup
+
+ON SUBMIT:
+  Call: POST /api/auth/login with email and password
+  Store returned JWT access token in httpOnly cookie only
+  Store refresh token in httpOnly cookie with longer expiry
+  On success: redirect to /dashboard
+  On error: show clear error message
+
+## GOOGLE OAUTH SETUP: lib/auth.ts with NextAuth.js
+Install: npm install next-auth
+Configure GoogleProvider and CredentialsProvider
+On Google sign in: POST /api/auth/google to FastAPI backend
+
+BACKEND: POST /api/auth/google
+  Check if user exists by email or google_id
+  If new user: Create User + Company + default Agent
+  Generate JWT access token
+  If new: redirect to /onboarding to complete setup
+  If existing: redirect to /dashboard
+
+## ONBOARDING WIZARD: app/onboarding/page.tsx
+5-step wizard with progress bar showing completion
+Step 1: Company details - website, country, timezone
+Step 2: Choose a Twilio phone number for your country
+Step 3: Configure agent - name, language, voice selection
+Step 4: Upload knowledge base - drag drop PDF or TXT files
+Step 5: Make a test call then click Go to Dashboard button
+
+## STRIPE PAYMENT FLOW:
+POST /api/billing/checkout body {plan} returns {checkout_url}
+Redirect user browser to checkout_url for Stripe hosted page
+
+STRIPE WEBHOOK: POST /webhooks/stripe
+On checkout.session.completed event:
+  Set company.status to active in database
+  Set agent.is_active to true in database
+  Send welcome email to customer via SendGrid
+  Send notification email or Slack to you as owner
+
+MUST: Store JWT tokens ONLY in httpOnly cookies always
+NEVER: Use localStorage or sessionStorage for any tokens
+MUST: Redirect logged-in users to /dashboard automatically
+MUST: All UI text and labels in English only
+ALWAYS: Validate form inputs completely before calling API

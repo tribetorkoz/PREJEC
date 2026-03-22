@@ -1,0 +1,111 @@
+# VOICECORE — PROJECT SETUP & FULL ARCHITECTURE
+
+You are an expert full-stack developer. Build a production-ready
+B2B Voice AI Agent Platform called VoiceCore.
+
+## PROJECT OVERVIEW
+A SaaS platform where businesses subscribe to get an AI voice agent
+that answers their customer calls 24/7 on phone and WhatsApp.
+
+## TECH STACK — USE EXACTLY THESE:
+- Backend: Python 3.11 + FastAPI
+- Voice Engine: Pipecat (pip install pipecat-ai)
+- STT (Speech-to-Text): Deepgram
+- TTS (Text-to-Speech): ElevenLabs
+- LLM: Anthropic Claude Sonnet (claude-sonnet-4-6)
+- Phone: Twilio (calls + WhatsApp)
+- Real-time: LiveKit WebRTC
+- Database: PostgreSQL via Supabase
+- Cache/Queue: Redis (Upstash)
+- Frontend: Next.js 14 (App Router) + TypeScript
+- Styling: Tailwind CSS + shadcn/ui
+- Payments: Stripe
+- Deploy: Docker + Railway
+
+## FOLDER STRUCTURE — CREATE EXACTLY THIS:
+voicecore/
+├── backend/
+│   ├── main.py                  # FastAPI entry point
+│   ├── config.py                # All env variables
+│   ├── requirements.txt         # All Python packages
+│   ├── agents/
+│   │   ├── voice_agent.py       # Main Pipecat agent
+│   │   ├── system_prompt.py     # Agent personality
+│   │   └── tools.py             # Agent tools
+│   ├── api/
+│   │   ├── calls.py             # Call management endpoints
+│   │   ├── agents.py            # Agent CRUD endpoints
+│   │   ├── analytics.py         # Analytics endpoints
+│   │   └── webhooks.py          # Twilio webhooks
+│   ├── db/
+│   │   ├── models.py            # SQLAlchemy models
+│   │   ├── database.py          # DB connection
+│   │   └── schemas.py           # Pydantic schemas
+│   └── services/
+│       ├── twilio_service.py    # Twilio calls handler
+│       ├── whatsapp_service.py  # WhatsApp handler
+│       └── stripe_service.py    # Billing service
+├── frontend/
+│   ├── app/
+│   │   ├── page.tsx             # Landing page
+│   │   ├── dashboard/page.tsx   # Main dashboard
+│   │   ├── agents/page.tsx      # Agent management
+│   │   └── analytics/page.tsx   # Call analytics
+│   ├── components/
+│   │   ├── CallLog.tsx          # Call history
+│   │   ├── AgentCard.tsx        # Agent display card
+│   │   └── StatsWidget.tsx      # Analytics widget
+│   └── lib/
+│       └── api.ts               # API client
+├── docker-compose.yml           # Full stack compose
+├── Dockerfile.backend
+├── Dockerfile.frontend
+└── .env.example                 # All required env vars
+
+## DATABASE MODELS — CREATE ALL OF THESE:
+
+// Company (tenant)
+Company: id, name, email, plan, stripe_customer_id,
+         phone_number, whatsapp_number, created_at
+
+// Voice Agent config per company
+Agent: id, company_id, name, language, voice_id,
+       system_prompt, is_active, created_at
+
+// Every call record
+Call: id, company_id, caller_phone, duration_seconds,
+      transcript, sentiment, outcome, created_at
+
+// Customer memory
+Customer: id, company_id, phone, name, notes,
+          last_call_at, total_calls
+
+## ENV VARIABLES — ADD ALL TO .env.example:
+DEEPGRAM_API_KEY=
+ELEVENLABS_API_KEY=
+ANTHROPIC_API_KEY=
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_PHONE_NUMBER=
+LIVEKIT_URL=
+LIVEKIT_API_KEY=
+LIVEKIT_API_SECRET=
+DATABASE_URL=
+REDIS_URL=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+NEXT_PUBLIC_API_URL=
+
+## TASK:
+1. Create the complete folder structure
+2. Write requirements.txt with exact package versions
+3. Write package.json for Next.js frontend
+4. Create all database models
+5. Create config.py with all env variable loading
+6. Create main.py with FastAPI app and all routers
+7. Write .env.example with all variables
+
+IMPORTANT: Use async/await everywhere in FastAPI.
+IMPORTANT: Add error handling to every function.
+IMPORTANT: Add type hints to all Python functions.
+IMPORTANT: Add TypeScript types to all frontend code.

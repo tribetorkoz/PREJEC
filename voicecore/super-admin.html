@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceCore - Super Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-zinc-950 min-h-screen text-white">
+    
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-amber-500/10 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                    </svg>
+                </div>
+                <h1 class="text-3xl font-bold">VoiceCore</h1>
+                <p class="text-zinc-400 mt-2">Super Admin Panel</p>
+            </div>
+
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+                <form id="loginForm">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-2">Email</label>
+                            <input type="email" id="loginEmail" value="admin@voicecore.ai"
+                                class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-400 mb-2">Password</label>
+                            <input type="password" id="loginPassword" value="VoiceCore2024!"
+                                class="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                        </div>
+                        <div id="loginError" class="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm hidden"></div>
+                        <button type="submit" id="loginBtn"
+                            class="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-semibold py-3 rounded-lg transition-colors">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardSection" class="hidden">
+        <!-- Sidebar -->
+        <div class="fixed left-0 top-0 h-full w-64 bg-zinc-900 border-r border-zinc-800 flex flex-col">
+            <div class="p-4 border-b border-zinc-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-amber-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-zinc-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                    </div>
+                    <span class="font-bold">VoiceCore</span>
+                </div>
+            </div>
+            
+            <nav id="sidebarNav" class="flex-1 p-4 space-y-1 overflow-y-auto">
+                <!-- Navigation items will be added by JS -->
+            </nav>
+
+            <div class="p-4 border-t border-zinc-800">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 bg-zinc-700 rounded-full flex items-center justify-center text-sm font-medium" id="adminInitial">A</div>
+                    <div class="text-sm">
+                        <p class="text-white" id="adminName">Admin</p>
+                        <p class="text-zinc-500 text-xs" id="adminEmail">admin@email.com</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center gap-2 px-3 py-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="ml-64 p-6">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-6">
+                <h1 id="pageTitle" class="text-2xl font-bold">Dashboard</h1>
+                <div class="flex items-center gap-4">
+                    <button onclick="refreshData()" class="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div id="contentArea">
+                <!-- Dynamic content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+        let currentPage = 'dashboard';
+        let adminToken = null;
+        let adminData = null;
+
+        // Navigation items
+        const navItems = [
+            { id: 'dashboard', label: 'Dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
+            { id: 'clients', label: 'Clients', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4' },
+            { id: 'agents', label: 'Agents', icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+            { id: 'calls', label: 'Calls', icon: 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z' },
+            { id: 'customers', label: 'Customers', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' },
+            { id: 'revenue', label: 'Revenue', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+            { id: 'platform', label: 'Platform', icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z' },
+            { id: 'providers', label: 'Providers', icon: 'M13 10V3L4 14h7v7l9-11h-7z' },
+            { id: 'verticals', label: 'Verticals', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+            { id: 'integrations', label: 'Integrations', icon: 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1' },
+            { id: 'intelligence', label: 'Intelligence', icon: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' },
+            { id: 'logs', label: 'Audit Logs', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+            { id: 'settings', label: 'Settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setupLoginForm();
+        });
+
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            const user = localStorage.getItem('admin_user');
+            
+            if (token && user) {
+                adminToken = token;
+                adminData = JSON.parse(user);
+                showDashboard();
+            } else {
+                showLogin();
+            }
+        }
+
+        function showLogin() {
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            
+            document.getElementById('adminInitial').textContent = adminData.name.charAt(0).toUpperCase();
+            document.getElementById('adminName').textContent = adminData.name;
+            document.getElementById('adminEmail').textContent = adminData.email;
+            
+            renderSidebar();
+            navigateTo('dashboard');
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('sidebarNav');
+            nav.innerHTML = navItems.map(item => `
+                <button onclick="navigateTo('${item.id}')" 
+                    class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${currentPage === item.id ? 'bg-amber-500/10 text-amber-500' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${item.icon}"/>
+                    </svg>
+                    <span>${item.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function setupLoginForm() {
+            document.getElementById('loginForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                const errorDiv = document.getElementById('loginError');
+                const btn = document.getElementById('loginBtn');
+                
+                btn.disabled = true;
+                btn.textContent = 'Signing in...';
+                errorDiv.classList.add('hidden');
+                
+                try {
+                    const response = await fetch(`${API_URL}/api/admin/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        throw new Error(data.detail || 'Login failed');
+                    }
+                    
+                    localStorage.setItem('admin_token', data.token);
+                    localStorage.setItem('admin_user', JSON.stringify(data.admin));
+                    
+                    adminToken = data.token;
+                    adminData = data.admin;
+                    showDashboard();
+                    
+                } catch (error) {
+                    errorDiv.textContent = error.message;
+                    errorDiv.classList.remove('hidden');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
+                }
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            adminToken = null;
+            adminData = null;
+            showLogin();
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${adminToken}`,
+                    ...options.headers
+                }
+            });
+            
+            if (response.status === 401) {
+                logout();
+                throw new Error('Session expired');
+            }
+            
+            return response.json();
+        }
+
+        function navigateTo(page) {
+            currentPage = page;
+            renderSidebar();
+            document.getElementById('pageTitle').textContent = navItems.find(n => n.id === page)?.label || page;
+            
+            const content = document.getElementById('contentArea');
+            content.innerHTML = '<div class="flex items-center justify-center h-64"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-500"></div></div>';
+            
+            switch(page) {
+                case 'dashboard': loadDashboard(); break;
+                case 'clients': loadClients(); break;
+                case 'agents': loadAgents(); break;
+                case 'calls': loadCalls(); break;
+                case 'customers': loadCustomers(); break;
+                case 'revenue': loadRevenue(); break;
+                case 'platform': loadPlatform(); break;
+                case 'providers': loadProviders(); break;
+                case 'verticals': loadVerticals(); break;
+                case 'integrations': loadIntegrations(); break;
+                case 'intelligence': loadIntelligence(); break;
+                case 'logs': loadLogs(); break;
+                case 'settings': loadSettings(); break;
+                default: loadDashboard();
+            }
+        }
+
+        function refreshData() {
+            navigateTo(currentPage);
+        }
+
+        // ============ PAGE LOADERS ============
+
+        async function loadDashboard() {
+            try {
+                const data = await apiCall('/api/admin/dashboard');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-zinc-400 text-sm">MRR</p>
+                                    <p class="text-2xl font-bold mt-1">$${data.kpis.mrr.toLocaleString()}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-green-500 text-sm mt-2">Monthly Recurring</p>
+                        </div>
+                        
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-zinc-400 text-sm">Total Clients</p>
+                                    <p class="text-2xl font-bold mt-1">${data.kpis.total_clients}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-zinc-400 text-sm mt-2">${data.kpis.active_clients} active</p>
+                        </div>
+                        
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-zinc-400 text-sm">Calls Today</p>
+                                    <p class="text-2xl font-bold mt-1">${data.kpis.calls_today}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-zinc-400 text-sm mt-2">${data.kpis.calls_this_month} this month</p>
+                        </div>
+                        
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-zinc-400 text-sm">Failed Calls</p>
+                                    <p class="text-2xl font-bold mt-1">${data.kpis.failed_calls}</p>
+                                </div>
+                                <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <p class="text-zinc-400 text-sm mt-2">${data.kpis.failed_calls_rate}% rate</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Calls Volume (Last 30 Days)</h3>
+                        <canvas id="callsChart" height="100"></canvas>
+                    </div>
+                `;
+                
+                // Render chart
+                new Chart(document.getElementById('callsChart'), {
+                    type: 'line',
+                    data: {
+                        labels: data.charts.calls_volume.map(c => c.date.slice(5)),
+                        datasets: [{
+                            label: 'Calls',
+                            data: data.charts.calls_volume.map(c => c.calls),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { color: '#3f3f46' }, ticks: { color: '#71717a' } },
+                            y: { grid: { color: '#3f3f46' }, ticks: { color: '#71717a' } }
+                        }
+                    }
+                });
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadClients() {
+            try {
+                const data = await apiCall('/api/admin/clients');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-zinc-800 bg-zinc-800/50">
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Company</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Plan</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Status</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">MRR</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Calls</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.clients.length === 0 ? `
+                                    <tr><td colspan="5" class="p-8 text-center text-zinc-500">No clients found</td></tr>
+                                ` : data.clients.map(c => `
+                                    <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
+                                        <td class="p-4">
+                                            <p class="text-white font-medium">${c.name}</p>
+                                            <p class="text-zinc-500 text-sm">${c.email}</p>
+                                        </td>
+                                        <td class="p-4"><span class="px-2 py-1 bg-zinc-800 text-zinc-300 text-sm rounded capitalize">${c.plan}</span></td>
+                                        <td class="p-4"><span class="px-2 py-1 text-sm rounded ${c.status === 'active' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">${c.status}</span></td>
+                                        <td class="p-4">$${c.mrr}</td>
+                                        <td class="p-4">${c.calls_count}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 text-zinc-400">Total: ${data.total} clients</div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadAgents() {
+            try {
+                const data = await apiCall('/api/admin/agents');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        ${data.agents.length === 0 ? `
+                            <div class="col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-8 text-center text-zinc-500">No agents found</div>
+                        ` : data.agents.map(a => `
+                            <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold">${a.name}</h3>
+                                        <p class="text-zinc-400 text-sm">${a.company_name}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded text-sm ${a.is_active ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">
+                                        ${a.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-zinc-400">Language</span>
+                                        <span>${a.language}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-zinc-400">Voice</span>
+                                        <span>${a.voice_id || 'Default'}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-zinc-400">Calls Today</span>
+                                        <span>${a.calls_today}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadCalls() {
+            try {
+                const data = await apiCall('/api/admin/calls?limit=50');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-zinc-800 bg-zinc-800/50">
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Company</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Caller</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Duration</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Sentiment</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Outcome</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.calls.length === 0 ? `
+                                    <tr><td colspan="5" class="p-8 text-center text-zinc-500">No calls found</td></tr>
+                                ` : data.calls.map(c => `
+                                    <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
+                                        <td class="p-4">${c.company_name}</td>
+                                        <td class="p-4">${c.caller_phone}</td>
+                                        <td class="p-4">${Math.floor(c.duration_seconds / 60)}:${(c.duration_seconds % 60).toString().padStart(2, '0')}</td>
+                                        <td class="p-4">
+                                            <span class="px-2 py-1 text-xs rounded ${
+                                                c.sentiment === 'POSITIVE' ? 'bg-green-500/10 text-green-500' :
+                                                c.sentiment === 'NEUTRAL' ? 'bg-yellow-500/10 text-yellow-500' :
+                                                'bg-red-500/10 text-red-500'
+                                            }">${c.sentiment || 'N/A'}</span>
+                                        </td>
+                                        <td class="p-4">${c.outcome || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadCustomers() {
+            try {
+                const data = await apiCall('/api/admin/customers?limit=50');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-zinc-800 bg-zinc-800/50">
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Phone</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Total Calls</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">First Call</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.customers.length === 0 ? `
+                                    <tr><td colspan="3" class="p-8 text-center text-zinc-500">No customers found</td></tr>
+                                ` : data.customers.map(c => `
+                                    <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
+                                        <td class="p-4 font-mono">${c.phone}</td>
+                                        <td class="p-4">${c.total_calls}</td>
+                                        <td class="p-4">${c.first_call ? new Date(c.first_call).toLocaleDateString() : '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadRevenue() {
+            try {
+                const data = await apiCall('/api/admin/revenue');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Monthly Recurring</p>
+                            <p class="text-2xl font-bold mt-1">$${data.mrr.toLocaleString()}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Annual Recurring</p>
+                            <p class="text-2xl font-bold mt-1">$${data.arr.toLocaleString()}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Total Clients</p>
+                            <p class="text-2xl font-bold mt-1">${data.total_clients}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Avg Revenue Per User</p>
+                            <p class="text-2xl font-bold mt-1">$${data.arpu}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-zinc-800 bg-zinc-800/50">
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Plan</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Clients</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Price</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Revenue</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">% of Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.plans.map(p => `
+                                    <tr class="border-b border-zinc-800">
+                                        <td class="p-4 capitalize">${p.name}</td>
+                                        <td class="p-4">${p.count}</td>
+                                        <td class="p-4">$${p.price}/mo</td>
+                                        <td class="p-4">$${p.revenue.toLocaleString()}</td>
+                                        <td class="p-4">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-24 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                                    <div class="h-full bg-amber-500 rounded-full" style="width: ${p.percentage}%"></div>
+                                                </div>
+                                                <span class="text-zinc-400 text-sm">${p.percentage}%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadPlatform() {
+            try {
+                const [platform, health] = await Promise.all([
+                    apiCall('/api/admin/platform'),
+                    apiCall('/api/admin/platform/health')
+                ]);
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <h3 class="text-lg font-semibold">System Health</h3>
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${health.overall === 'healthy' ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}">
+                                ${health.overall === 'healthy' ? 'Healthy' : 'Issues'}
+                            </span>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            ${Object.entries(health.services || {}).map(([key, value]) => `
+                                <div class="bg-zinc-800 rounded-lg p-3">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs text-zinc-400 capitalize">${key.replace('_', ' ')}</span>
+                                        <span class="w-2 h-2 rounded-full ${value.status === 'healthy' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                                    </div>
+                                    ${value.latency_ms ? `<p class="text-lg font-semibold">${value.latency_ms}ms</p>` : ''}
+                                    ${value.connections ? `<p class="text-lg font-semibold">${value.connections}</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Total Companies</p>
+                            <p class="text-3xl font-bold">${platform.stats.total_companies}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Total Agents</p>
+                            <p class="text-3xl font-bold">${platform.stats.total_agents}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Total Calls</p>
+                            <p class="text-3xl font-bold">${platform.stats.total_calls}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadProviders() {
+            try {
+                const data = await apiCall('/api/admin/providers');
+                document.getElementById('contentArea').innerHTML = `
+                    ${['stt', 'llm', 'tts'].map(type => `
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-4">
+                            <h3 class="text-lg font-semibold mb-4 uppercase">${type === 'stt' ? 'Speech-to-Text' : type === 'llm' ? 'Language Models' : 'Text-to-Speech'}</h3>
+                            <div class="space-y-3">
+                                ${data[type].map(p => `
+                                    <div class="flex items-center justify-between bg-zinc-800 rounded-lg p-4">
+                                        <div class="flex items-center gap-4">
+                                            <span class="w-3 h-3 rounded-full ${p.status === 'healthy' ? 'bg-green-500' : p.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'}"></span>
+                                            <div>
+                                                <p class="font-medium capitalize">${p.name}</p>
+                                                <p class="text-sm text-zinc-400">${p.model || 'Priority: ' + p.priority}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-6">
+                                            <div class="text-right">
+                                                <p class="text-sm text-zinc-400">Latency</p>
+                                                <p class="font-medium">${p.latency_ms}ms</p>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-sm text-zinc-400">Success</p>
+                                                <p class="font-medium text-green-500">${p.success_rate}%</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadVerticals() {
+            try {
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold">Healthcare</h3>
+                                    <p class="text-sm text-zinc-400">Medical Practices</p>
+                                </div>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 text-center pt-4 border-t border-zinc-800">
+                                <div>
+                                    <p class="text-2xl font-bold">$499</p>
+                                    <p class="text-xs text-zinc-400">/month</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">24</p>
+                                    <p class="text-xs text-zinc-400">Companies</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">12k</p>
+                                    <p class="text-xs text-zinc-400">Calls</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold">Legal</h3>
+                                    <p class="text-sm text-zinc-400">Law Firms</p>
+                                </div>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 text-center pt-4 border-t border-zinc-800">
+                                <div>
+                                    <p class="text-2xl font-bold">$599</p>
+                                    <p class="text-xs text-zinc-400">/month</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">18</p>
+                                    <p class="text-xs text-zinc-400">Companies</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">8k</p>
+                                    <p class="text-xs text-zinc-400">Calls</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <h3 class="text-lg font-semibold">Real Estate</h3>
+                                    <p class="text-sm text-zinc-400">Agencies</p>
+                                </div>
+                                <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                            </div>
+                            <div class="grid grid-cols-3 gap-4 text-center pt-4 border-t border-zinc-800">
+                                <div>
+                                    <p class="text-2xl font-bold">$399</p>
+                                    <p class="text-xs text-zinc-400">/month</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">32</p>
+                                    <p class="text-xs text-zinc-400">Companies</p>
+                                </div>
+                                <div>
+                                    <p class="text-2xl font-bold">15k</p>
+                                    <p class="text-xs text-zinc-400">Calls</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadIntegrations() {
+            try {
+                const integrations = [
+                    { name: 'Salesforce', type: 'crm', count: 45 },
+                    { name: 'HubSpot', type: 'crm', count: 32 },
+                    { name: 'Google Calendar', type: 'calendar', count: 67 },
+                    { name: 'Outlook', type: 'calendar', count: 28 },
+                    { name: 'Zapier', type: 'other', count: 51 },
+                    { name: 'Slack', type: 'other', count: 73 },
+                ];
+                const totalConnections = integrations.reduce((sum, i) => sum + i.count, 0);
+                
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold">${integrations.filter(i => i.type === 'crm').length}</p>
+                                <p class="text-zinc-400 text-sm">CRM Integrations</p>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold">${integrations.filter(i => i.type === 'calendar').length}</p>
+                                <p class="text-zinc-400 text-sm">Calendar Integrations</p>
+                            </div>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-bold">${totalConnections}</p>
+                                <p class="text-zinc-400 text-sm">Total Connections</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">All Integrations</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${integrations.map(i => `
+                                <div class="flex items-center justify-between bg-zinc-800 rounded-lg p-4">
+                                    <div class="flex items-center gap-3">
+                                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                        <span class="capitalize">${i.name.replace('_', ' ')}</span>
+                                    </div>
+                                    <span class="text-zinc-400 text-sm">${i.count} using</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadIntelligence() {
+            try {
+                const data = await apiCall('/api/admin/dashboard');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Total Calls Analyzed</p>
+                            <p class="text-3xl font-bold">${data.kpis.total_calls}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Positive Sentiment</p>
+                            <p class="text-3xl font-bold">${data.kpis.happy_calls}</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">Avg Duration</p>
+                            <p class="text-3xl font-bold">${data.kpis.avg_duration_seconds}s</p>
+                        </div>
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <p class="text-zinc-400 text-sm">This Month</p>
+                            <p class="text-3xl font-bold">${data.kpis.calls_this_month}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <h3 class="text-lg font-semibold mb-4">Sentiment Analysis</h3>
+                            <div class="space-y-4">
+                                ${Object.entries(data.sentiment_breakdown || {}).map(([sentiment, count]) => {
+                                    const total = Object.values(data.sentiment_breakdown || {}).reduce((a, b) => a + b, 0);
+                                    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+                                    return `
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span class="capitalize">${sentiment}</span>
+                                            <span>${pct}% (${count})</span>
+                                        </div>
+                                        <div class="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                            <div class="h-full ${sentiment === 'POSITIVE' ? 'bg-green-500' : sentiment === 'NEUTRAL' ? 'bg-yellow-500' : 'bg-red-500'} rounded-full" style="width: ${pct}%"></div>
+                                        </div>
+                                    </div>
+                                `}).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                            <h3 class="text-lg font-semibold mb-4">Top Intents</h3>
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between p-2 bg-zinc-800 rounded">
+                                    <span class="capitalize">Appointment Booking</span>
+                                    <span class="text-amber-500 font-medium">1,245</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-zinc-800 rounded">
+                                    <span class="capitalize">Business Hours</span>
+                                    <span class="text-amber-500 font-medium">892</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-zinc-800 rounded">
+                                    <span class="capitalize">General Inquiry</span>
+                                    <span class="text-amber-500 font-medium">734</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-zinc-800 rounded">
+                                    <span class="capitalize">Service Request</span>
+                                    <span class="text-amber-500 font-medium">523</span>
+                                </div>
+                                <div class="flex items-center justify-between p-2 bg-zinc-800 rounded">
+                                    <span class="capitalize">Complaint</span>
+                                    <span class="text-amber-500 font-medium">156</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadLogs() {
+            try {
+                const data = await apiCall('/api/admin/logs?limit=50');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-zinc-800 bg-zinc-800/50">
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Timestamp</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Action</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Admin</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">IP</th>
+                                    <th class="text-left p-4 text-zinc-400 font-medium">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.logs.length === 0 ? `
+                                    <tr><td colspan="5" class="p-8 text-center text-zinc-500">No logs found</td></tr>
+                                ` : data.logs.map(log => `
+                                    <tr class="border-b border-zinc-800 hover:bg-zinc-800/50">
+                                        <td class="p-4 text-zinc-400 text-sm">${new Date(log.timestamp).toLocaleString()}</td>
+                                        <td class="p-4">
+                                            <span class="font-medium ${
+                                                log.action.includes('DELETE') || log.action.includes('SUSPENDED') ? 'text-red-500' :
+                                                log.action.includes('CREATE') ? 'text-green-500' :
+                                                'text-zinc-400'
+                                            }">${log.action}</span>
+                                        </td>
+                                        <td class="p-4 text-sm">
+                                            <p class="text-white">${log.admin_name}</p>
+                                            <p class="text-zinc-500">${log.admin_email}</p>
+                                        </td>
+                                        <td class="p-4 text-zinc-400 font-mono text-sm">${log.ip_address || '-'}</td>
+                                        <td class="p-4 text-zinc-400 text-sm max-w-xs truncate">${log.details || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+
+        async function loadSettings() {
+            try {
+                const data = await apiCall('/api/admin/settings');
+                document.getElementById('contentArea').innerHTML = `
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Feature Flags</h3>
+                        <div class="space-y-3">
+                            ${data.feature_flags.length === 0 ? `
+                                <p class="text-zinc-500">No feature flags configured</p>
+                            ` : data.feature_flags.map(flag => `
+                                <div class="flex items-center justify-between p-4 bg-zinc-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">${flag.name}</p>
+                                        <p class="text-zinc-500 text-sm">${flag.description || ''}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded text-sm ${flag.is_global_enabled ? 'bg-green-500/10 text-green-500' : 'bg-zinc-700 text-zinc-400'}">
+                                        ${flag.is_global_enabled ? 'Enabled' : 'Disabled'}
+                                    </span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">System Settings</h3>
+                        <div class="space-y-3">
+                            ${data.api_keys.map(key => `
+                                <div class="flex items-center justify-between p-4 bg-zinc-800 rounded-lg">
+                                    <div>
+                                        <p class="font-medium">${key.key}</p>
+                                        <p class="text-zinc-500 text-sm font-mono">${key.display_value}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                document.getElementById('contentArea').innerHTML = `<div class="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

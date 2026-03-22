@@ -1,0 +1,146 @@
+# VOICECORE — REFACTOR TO ENTERPRISE ARCHITECTURE
+
+You are a senior software architect.
+Refactor the existing VoiceCore codebase to match
+enterprise-grade file structure used by companies like
+Stripe, Linear, Airbnb, and Netflix.
+
+## STEP 1 — Restructure Backend (FastAPI)
+
+Move all files from the current flat structure to
+feature-based modules:
+
+OLD structure:
+  backend/api/auth.py
+  backend/api/calls.py
+  backend/db/models.py
+
+NEW structure (create all these folders and files):
+  apps/api/src/features/auth/router.py
+  apps/api/src/features/auth/service.py
+  apps/api/src/features/auth/schemas.py
+  apps/api/src/features/auth/models.py
+
+  apps/api/src/features/voice/router.py
+  apps/api/src/features/voice/pipeline.py
+  apps/api/src/features/voice/tools.py
+  apps/api/src/features/voice/memory.py
+  apps/api/src/features/voice/emotions.py
+  apps/api/src/features/voice/prompts.py
+
+  apps/api/src/features/companies/router.py
+  apps/api/src/features/companies/service.py
+  apps/api/src/features/companies/schemas.py
+  apps/api/src/features/companies/models.py
+
+  apps/api/src/features/agents/router.py
+  apps/api/src/features/agents/service.py
+  apps/api/src/features/agents/schemas.py
+  apps/api/src/features/agents/models.py
+
+  apps/api/src/features/calls/router.py
+  apps/api/src/features/calls/service.py
+  apps/api/src/features/calls/schemas.py
+  apps/api/src/features/calls/models.py
+
+  apps/api/src/features/billing/router.py
+  apps/api/src/features/billing/service.py
+  apps/api/src/features/billing/schemas.py
+
+  apps/api/src/features/analytics/router.py
+  apps/api/src/features/analytics/service.py
+
+  apps/api/src/features/admin/router.py
+  apps/api/src/features/admin/service.py
+  apps/api/src/features/admin/middleware.py
+
+  apps/api/src/core/config.py
+  apps/api/src/core/security.py
+  apps/api/src/core/exceptions.py
+  apps/api/src/core/middleware.py
+  apps/api/src/core/dependencies.py
+
+  apps/api/src/integrations/twilio/client.py
+  apps/api/src/integrations/twilio/calls.py
+  apps/api/src/integrations/twilio/whatsapp.py
+  apps/api/src/integrations/twilio/webhooks.py
+  apps/api/src/integrations/deepgram/stt.py
+  apps/api/src/integrations/elevenlabs/tts.py
+  apps/api/src/integrations/anthropic/llm.py
+  apps/api/src/integrations/stripe/subscriptions.py
+  apps/api/src/integrations/stripe/webhooks.py
+  apps/api/src/integrations/livekit/transport.py
+  apps/api/src/integrations/sendgrid/email.py
+
+  apps/api/src/db/connection.py
+  apps/api/src/db/base.py
+  apps/api/src/db/migrations/env.py
+
+  apps/api/src/main.py
+
+## STEP 2 — Restructure Frontend (Next.js)
+
+Move all pages to route groups:
+
+  apps/web/src/app/(public)/page.tsx       # Landing
+  apps/web/src/app/(auth)/login/page.tsx
+  apps/web/src/app/(auth)/signup/page.tsx
+  apps/web/src/app/(app)/layout.tsx        # Dashboard layout
+  apps/web/src/app/(app)/dashboard/page.tsx
+  apps/web/src/app/(app)/dashboard/calls/page.tsx
+  apps/web/src/app/(app)/dashboard/analytics/page.tsx
+  apps/web/src/app/(app)/dashboard/agent/page.tsx
+  apps/web/src/app/(app)/dashboard/settings/page.tsx
+  apps/web/src/app/(admin)/[secret]/page.tsx
+
+Create component hierarchy:
+  apps/web/src/components/ui/          # shadcn base
+  apps/web/src/components/shared/      # Navbar, Sidebar, Footer
+  apps/web/src/components/dashboard/   # StatsCard, CallTable, etc.
+  apps/web/src/components/charts/      # All Recharts components
+  apps/web/src/components/forms/       # Form components
+
+Create dedicated folders:
+  apps/web/src/hooks/     # Custom React hooks
+  apps/web/src/stores/    # Zustand state
+  apps/web/src/types/     # TypeScript types
+  apps/web/src/lib/       # Utilities, auth, API client
+
+## STEP 3 — Add Celery Worker
+
+Create apps/worker/ for background jobs:
+  apps/worker/tasks/notifications.py
+  apps/worker/tasks/transcripts.py
+  apps/worker/tasks/reminders.py
+  apps/worker/celery_app.py
+
+## STEP 4 — Add CI/CD
+
+Create .github/workflows/:
+  .github/workflows/ci.yml
+  # Runs on every PR: lint + type-check + tests
+  # Steps: checkout, setup Python/Node, install deps, run tests
+
+  .github/workflows/deploy-production.yml
+  # Runs on merge to main: build Docker + push to Railway
+
+## STEP 5 — Add Shared Infrastructure
+
+Create infrastructure/:
+  infrastructure/docker/Dockerfile.api
+  infrastructure/docker/Dockerfile.web
+  infrastructure/docker/Dockerfile.worker
+  infrastructure/docker/nginx.conf
+  infrastructure/scripts/setup.sh
+  infrastructure/scripts/deploy.sh
+  infrastructure/scripts/seed.py
+
+## STEP 6 — Update All Imports
+
+After moving all files, update every import statement
+in every file to use the new paths.
+
+MUST: Run the project after refactoring to confirm zero import errors
+MUST: All tests pass after refactoring
+MUST: docker-compose up still works after refactoring
+NEVER: Delete any business logic during the move — only reorganize

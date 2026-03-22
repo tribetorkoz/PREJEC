@@ -1,0 +1,81 @@
+# VOICECORE — TWILIO + WHATSAPP INTEGRATION
+
+Continue building VoiceCore.
+Now implement full Twilio phone + WhatsApp integration.
+
+## FILE: backend/services/twilio_service.py
+
+### INBOUND PHONE CALLS:
+async def handle_inbound_call(company_id, caller_phone):
+    # 1. Receive Twilio webhook POST /calls/inbound
+    # 2. Look up company agent config from database
+    # 3. Load customer memory for this caller
+    # 4. Start Pipecat voice pipeline
+    # 5. Return TwiML to connect call to pipeline
+    # 6. After call: save transcript + analytics
+
+### OUTBOUND CALLS (proactive agent):
+async def make_outbound_call(company_id, customer_phone, reason):
+    # Trigger call from VoiceCore to customer
+    # Use cases: appointment reminders, follow-ups
+    # ALWAYS check calling hours (respect timezone)
+    # Log call attempt in database
+
+### CALL FORWARDING TO HUMAN:
+async def transfer_to_human(call_sid, agent_phone):
+    # When AI cannot handle the situation
+    # Transfer seamlessly — customer must NOT be dropped
+    # ALWAYS say: 'Connecting you to a specialist now'
+    # Pass full context to human agent via SMS
+
+## FILE: backend/services/whatsapp_service.py
+
+### WHATSAPP VOICE CALLS (Twilio WhatsApp Calling):
+async def handle_whatsapp_voice(company_id, caller_wa_id):
+    # Handle incoming WhatsApp voice calls
+    # Same Pipecat pipeline as phone calls
+    # WhatsApp Business API via Twilio
+
+### WHATSAPP TEXT MESSAGES:
+async def handle_whatsapp_text(company_id, from_number, message):
+    # Handle incoming WhatsApp text messages
+    # Use Claude to respond (text, not voice)
+    # Send booking confirmations after voice calls
+    # Send reminders 24 hours before appointments
+
+### AUTOMATED WHATSAPP MESSAGES:
+async def send_confirmation(phone, appointment_details):
+    # After booking: send WhatsApp confirmation
+    # Template: 'Your appointment is confirmed for [DATE]
+    #            at [TIME]. Reply CANCEL to cancel.'
+
+async def send_reminder(phone, appointment_details):
+    # 24 hours before: send reminder
+    # 2 hours before: send final reminder
+
+## FILE: backend/api/webhooks.py
+Handle all Twilio webhooks:
+
+POST /webhooks/twilio/voice          # Inbound phone calls
+POST /webhooks/twilio/voice/status   # Call status updates
+POST /webhooks/twilio/whatsapp       # WhatsApp messages
+POST /webhooks/stripe                # Stripe payment events
+
+## MULTI-TENANT ROUTING:
+# Each company gets their own Twilio phone number
+# Route incoming calls to correct company agent
+# Method: match Twilio 'To' number to company in database
+
+async def route_call_to_company(to_number: str):
+    company = await db.get_company_by_phone(to_number)
+    if not company:
+        # Play: 'This number is not in service'
+        return
+    agent = await db.get_active_agent(company.id)
+    return agent
+
+## IMPORTANT:
+- Validate ALL Twilio webhook signatures for security
+- NEVER process webhook without signature validation
+- Use twilio.request_validator for every webhook
+- Rate limit: max 10 concurrent calls per company on Starter plan

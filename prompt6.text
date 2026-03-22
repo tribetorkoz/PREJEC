@@ -1,0 +1,225 @@
+Add a complete Super Admin Panel to the VoiceCore project.
+This panel is ONLY for the platform owner — hidden from all clients.
+
+## SECURITY — IMPLEMENT FIRST, BEFORE ANYTHING ELSE:
+
+// 1. Separate admin route: /super-admin (NOT /admin)
+// 2. Hard-coded secret URL slug (change this to something secret):
+ADMIN_SECRET_PATH = 'sa-' + process.env.ADMIN_SECRET_SLUG
+// Example: /super-admin/x9k2m7p → only you know this URL
+
+// 3. Two-Factor Authentication (MANDATORY):
+- Email + Password login
+- TOTP 2FA (Google Authenticator)
+- After 3 failed attempts: lock for 30 minutes + email alert
+- Session timeout: 2 hours of inactivity
+
+// 4. IP Whitelist (optional but recommended):
+ALLOWED_ADMIN_IPS = process.env.ADMIN_ALLOWED_IPS.split(',')
+// Block any admin login attempt from unlisted IPs
+
+// 5. ALL admin actions MUST be logged:
+AdminLog: { action, performed_by, target, timestamp, ip, details }
+// Never delete admin logs — append only
+
+## TECH STACK FOR ADMIN PANEL:
+- Route: Next.js /app/super-admin/[...path]/page.tsx
+- Auth: NextAuth with separate admin credentials
+- Charts: Recharts
+- Tables: TanStack Table (sorting, filtering, pagination)
+- Forms: React Hook Form + Zod validation
+- Notifications: react-hot-toast
+- Real-time: WebSocket for live call monitoring
+
+## PAGE 1: /super-admin — MAIN DASHBOARD
+
+Show these KPI cards at the top:
+┌─────────────────────────────────────────────────────────┐
+│  💰 MRR        📈 Total Clients    📞 Calls Today      │
+│  $X,XXX        XX active            XXX calls           │
+│                                                         │
+│  ⚠️ Failed Calls  💳 Revenue MTD    🔴 Active Issues   │
+│  X (0.X%)         $XX,XXX            X alerts           │
+└─────────────────────────────────────────────────────────┘
+
+Charts to display:
+- Revenue growth (line chart: last 12 months)
+- New clients per month (bar chart)
+- Calls volume (area chart: last 30 days)
+- Churn rate trend
+
+## PAGE 2: /super-admin/clients — CLIENT MANAGEMENT
+
+Table with ALL companies (searchable, sortable, filterable):
+Columns: Company Name | Plan | Status | MRR | Calls/Month | Joined | Actions
+
+Actions per client (dropdown button per row):
+✅ View full details (calls, agents, usage, invoices)
+✏️  Edit company info (name, email, phone number)
+⬆️  Upgrade/downgrade plan
+⏸️  Suspend account (agent stops answering, client notified)
+🗑️  Delete account (with confirmation: type company name)
+💬 Send message to client
+🔑 Reset client password
+📊 View client analytics
+
+Add Client Form (modal):
+Fields: Company Name, Email, Phone, WhatsApp, Plan, Notes
+After save: auto-generate login credentials + send welcome email
+
+## PAGE 3: /super-admin/agents — AGENT CONTROL CENTER
+
+View ALL agents across ALL companies:
+Columns: Agent Name | Company | Status | Calls Today | Last Active
+
+For each agent, edit WITHOUT code:
+
+// System Prompt Editor (rich text, with variables):
+<AgentPromptEditor
+  variables={['company_name', 'customer_name', 'business_hours']}
+  onSave={(prompt) => updateAgent(agent.id, { system_prompt: prompt })}
+/>
+
+// Voice Settings:
+- Change TTS voice (dropdown + preview button)
+- Adjust speaking speed (slider: 0.5x to 2.0x)
+- Language: Arabic / English / French / Auto-detect
+
+// Behavior Settings (all toggles — no code needed):
+✅ Can book appointments
+✅ Can transfer to human
+✅ Send WhatsApp confirmations
+✅ Proactive follow-up calls
+✅ Remember customer history
+❌ Can make outbound calls
+
+// Business Hours:
+Visual schedule builder (drag to set hours per day)
+Timezone selector
+Holiday dates (when agent should not answer)
+
+## PAGE 4: /super-admin/calls — LIVE CALL MONITOR
+
+// Real-time active calls:
+Show live table of ALL ongoing calls across all companies:
+Columns: Company | Caller | Duration | Sentiment | Agent
+- Sentiment indicator: 🟢 Positive / 🟡 Neutral / 🔴 Angry
+- Click to read live transcript (updates every 2 seconds)
+- Emergency button: 'Force Transfer to Human'
+
+// Call History (all companies):
+Full searchable history with filters:
+- Filter by: company, date range, sentiment, outcome, duration
+- Click any call: full transcript + audio player + AI summary
+- Export selected calls to CSV
+
+// Missed calls alert:
+Show red badge if any call was missed (should always be 0)
+
+## PAGE 5: /super-admin/revenue — REVENUE & BILLING
+
+Connect to Stripe API and show:
+
+// Key Metrics:
+- MRR (Monthly Recurring Revenue)
+- ARR (Annual Recurring Revenue)
+- Churn Rate this month
+- Average Revenue Per User (ARPU)
+- New revenue vs churned revenue
+
+// Clients by Plan table:
+Plan | Count | Revenue | % of Total
+Starter ($299) | X | $X,XXX | XX%
+Business ($899) | X | $X,XXX | XX%
+Enterprise | X | $X,XXX | XX%
+
+// Change Pricing (NO CODE NEEDED):
+// Admin can change plan prices directly from UI
+// Updates Stripe price AND database immediately
+async function updatePlanPrice(plan, newPrice) {
+    await stripe.prices.create({ ... })
+    await db.updatePlanPrice(plan, newPrice)
+}
+
+// Failed Payments:
+Table of failed invoices with: retry / write-off / contact buttons
+
+## PAGE 6: /super-admin/settings — SYSTEM SETTINGS
+
+// API Keys Manager (NO CODE NEEDED):
+// Change all API keys from the UI — takes effect immediately
+┌────────────────────────────────────────────┐
+│ 🎤 Deepgram API Key        [••••••] [Edit] │
+│ 🔊 ElevenLabs API Key      [••••••] [Edit] │
+│ 🧠 Anthropic API Key       [••••••] [Edit] │
+│ 📞 Twilio Account SID      [••••••] [Edit] │
+│ 📞 Twilio Auth Token       [••••••] [Edit] │
+│ 💳 Stripe Secret Key       [••••••] [Edit] │
+└────────────────────────────────────────────┘
+IMPORTANT: Encrypt all API keys at rest (use AES-256)
+IMPORTANT: Never show full key — only last 4 chars
+IMPORTANT: Log every key change with timestamp
+
+// Feature Flags (toggles per client or global):
+Create <FeatureFlagManager> component:
+- List all features
+- Toggle ON/OFF per specific company
+- Toggle ON/OFF globally for all companies
+- No deployment needed — takes effect immediately
+
+// Notification Center:
+// Send messages to clients without email:
+- Select: All clients / Specific plan / Single company
+- Message types: Maintenance alert / New feature / Invoice reminder
+- Delivery: In-app notification + optional email
+
+// Backup & Export:
+Button: 'Download Full Database Backup' → JSON export
+Button: 'Export All Clients CSV'
+Button: 'Export All Calls CSV'
+Auto-backup: every 24 hours to cloud storage
+
+## PAGE 7: /super-admin/logs — AUDIT LOGS
+
+Immutable log of ALL admin actions:
+Columns: Timestamp | Action | Target | Admin | IP | Details
+- Filter by action type or date range
+- Cannot delete logs (read-only)
+- Export to CSV for compliance
+
+## BACKEND: backend/api/admin.py
+
+Create separate admin router with prefix /api/admin:
+
+// Middleware: verify admin token on EVERY request
+async def verify_admin(request: Request):
+    token = request.headers.get('X-Admin-Token')
+    if not token or not verify_admin_jwt(token):
+        raise HTTPException(403, 'Admin access denied')
+    log_admin_request(request)  # log every access
+
+// Admin-only endpoints:
+GET  /api/admin/dashboard         # KPIs and stats
+GET  /api/admin/clients           # All companies
+POST /api/admin/clients           # Add new company
+PUT  /api/admin/clients/{id}      # Edit company
+POST /api/admin/clients/{id}/suspend   # Suspend
+DELETE /api/admin/clients/{id}    # Delete (hard)
+GET  /api/admin/calls/live        # Live calls (WebSocket)
+GET  /api/admin/calls/history     # All calls history
+GET  /api/admin/revenue           # Stripe data
+PUT  /api/admin/settings/apikeys  # Update API keys
+PUT  /api/admin/settings/pricing  # Update plan prices
+POST /api/admin/notify            # Send notification
+GET  /api/admin/logs              # Admin audit logs
+
+## IMPORTANT REQUIREMENTS:
+MUST: Admin panel NEVER shares routes with client dashboard
+MUST: All API calls use separate admin JWT token
+MUST: Show loading states for all async operations
+MUST: Confirm dialogs before destructive actions
+MUST: All forms validate before submit
+NEVER: Show raw database IDs to admin — use friendly names
+NEVER: Allow bulk delete without typing 'DELETE' to confirm
+ALWAYS: Auto-refresh dashboard data every 30 seconds
+ALWAYS: Show last-updated timestamp on all data

@@ -1,0 +1,29 @@
+<div style="text-align: center;">
+    <h1 style="color: #F59E0B; font-size: 24px; margin: 0 0 20px 0;">
+        Is everything OK?
+    </h1>
+    <p style="color: #A1A1AA; font-size: 16px; margin: 0 0 10px 0;">
+        We noticed <strong>{{ company_name }}</strong>'s agent has been quiet for
+    </p>
+    <p style="color: #FFFFFF; font-size: 24px; margin: 0;">
+        <strong>{{ days_inactive }} days</strong>
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid #27272A; margin: 30px 0;">
+    
+    <p style="color: #71717A; font-size: 14px; margin: 0 0 20px 0;">
+        Need help? We're here for you.
+    </p>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+        <tr>
+            <td style="background-color: #27272A; border-radius: 8px;">
+                <a href="{{ troubleshooting_url }}" style="display: inline-block; color: #FFF; font-size: 14px; padding: 12px 24px; text-decoration: none; margin-right: 10px;">Troubleshooting</a>
+            </td>
+            <td style="width: 10px;"></td>
+            <td style="background-color: #F59E0B; border-radius: 8px;">
+                <a href="{{ support_url }}" style="display: inline-block; color: #000; font-size: 14px; font-weight: bold; padding: 12px 24px; text-decoration: none;">Contact Support</a>
+            </td>
+        </tr>
+    </table>
+</div>

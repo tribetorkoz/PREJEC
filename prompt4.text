@@ -1,0 +1,88 @@
+
+Continue building VoiceCore.
+Build the complete Next.js dashboard for business clients.
+
+## DESIGN SYSTEM:
+Colors: background #080c14, accent #f59e0b, text #f8f4ec
+Font: Cairo (Arabic support) + Inter
+Style: Dark theme, professional, modern
+Direction: Support both RTL (Arabic) and LTR (English)
+
+## PAGE 1: app/page.tsx — LANDING PAGE
+Sections needed:
+- Hero: headline + demo button + wave animation
+- How it works: 3 steps with icons
+- Pricing: 3 plans (Starter $299, Business $899, Enterprise)
+- Social proof: stats (calls handled, companies, uptime)
+- CTA: Start trial button → /onboarding
+
+## PAGE 2: app/dashboard/page.tsx — MAIN DASHBOARD
+Show these widgets:
+- Total calls today / this week / this month
+- Missed calls rate (should be 0%)
+- Average call duration
+- Customer sentiment breakdown (pie chart)
+- Recent calls list (last 10, with play button)
+- Agent status: ONLINE / OFFLINE toggle
+
+## PAGE 3: app/agents/page.tsx — AGENT MANAGEMENT
+Features needed:
+- View current agent config
+- Edit agent name and personality
+- Upload company knowledge base (PDF/text)
+- Test agent with live demo call button
+- Change voice (dropdown with audio previews)
+- Set business hours (when agent is active)
+- Language settings (Arabic/English/French/Auto)
+
+## PAGE 4: app/calls/page.tsx — CALL HISTORY
+Features needed:
+- Paginated table of all calls
+- Columns: date, caller, duration, outcome, sentiment
+- Click row to expand: full transcript + audio player
+- Filter by: date range, outcome, sentiment
+- Export to CSV button
+- Search by phone number or keyword
+
+## PAGE 5: app/analytics/page.tsx — ANALYTICS
+Charts needed (use Recharts):
+- Line chart: calls per day (last 30 days)
+- Bar chart: peak hours (when most calls come in)
+- Pie chart: call outcomes
+- Sentiment trend over time
+- Top questions asked by customers (word cloud or list)
+
+## COMPONENTS TO BUILD:
+
+// components/CallPlayer.tsx
+// Audio player for call recordings with transcript sync
+
+// components/AgentStatusToggle.tsx  
+// Big toggle: agent online/offline with animation
+
+// components/LiveCallMonitor.tsx
+// Real-time view of ongoing calls (WebSocket)
+
+// components/OnboardingWizard.tsx
+// 5-step setup: company info, agent config, test call
+
+## API INTEGRATION:
+// lib/api.ts — build typed API client
+const api = {
+  calls: { list, get, getAnalytics },
+  agents: { get, update, test },
+  analytics: { getDashboard, getCallStats }
+}
+
+## AUTHENTICATION:
+- Use NextAuth.js with email/password
+- Add Google OAuth as option
+- Protect all /dashboard routes
+- Multi-tenant: each login sees only their data
+
+## IMPORTANT REQUIREMENTS:
+- MUST work on mobile (responsive design)
+- MUST support Arabic RTL layout
+- Use Suspense and loading skeletons
+- Add error boundaries to all pages
+- Optimize for Core Web Vitals

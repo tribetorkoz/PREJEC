@@ -1,0 +1,40 @@
+<div>
+    <h1 style="color: #F59E0B; font-size: 24px; margin: 0 0 5px 0;">
+        📈 Weekly Report
+    </h1>
+    <p style="color: #71717A; font-size: 14px; margin: 0 0 20px 0;">
+        {{ week_start }} - {{ week_end }} - {{ company_name }}
+    </p>
+    
+    <hr style="border: none; border-top: 1px solid #27272A; margin: 20px 0;">
+    
+    <div style="background-color: #27272A; padding: 30px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+        <p style="color: #F59E0B; font-size: 56px; font-weight: bold; margin: 0;">{{ total_calls }}</p>
+        <p style="color: #71717A; font-size: 14px; margin: 10px 0;">Total Calls</p>
+        <p style="color: {% if weekly_trend > 0 %}#22C55E{% else %}#EF4444{% endif %}; font-size: 18px; margin: 15px 0 0 0;">
+            {% if weekly_trend > 0 %}↑{% else %}↓{% endif %} {{ weekly_trend | abs }}% vs last week
+        </p>
+    </div>
+    
+    <table style="width: 100%; margin-bottom: 20px;">
+        <tr>
+            <td style="padding: 10px; background-color: #27272A; border-radius: 8px; text-align: center;">
+                <p style="color: #EF4444; font-size: 20px; margin: 0;">{{ missed_calls }}</p>
+                <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Missed Calls</p>
+            </td>
+            <td style="width: 10px;"></td>
+            <td style="padding: 10px; background-color: #27272A; border-radius: 8px; text-align: center;">
+                <p style="color: #22C55E; font-size: 20px; margin: 0;">{{ appointments_booked }}</p>
+                <p style="color: #71717A; font-size: 12px; margin: 5px 0 0 0;">Appointments</p>
+            </td>
+        </tr>
+    </table>
+    
+    <table role="presentation" cellspacing="0" cellpadding="0" style="margin: 0 auto;">
+        <tr>
+            <td style="background-color: #F59E0B; border-radius: 8px;">
+                <a href="{{ dashboard_url }}" style="display: inline-block; color: #000; font-size: 14px; font-weight: bold; padding: 15px 30px; text-decoration: none;">View Full Report</a>
+            </td>
+        </tr>
+    </table>
+</div>

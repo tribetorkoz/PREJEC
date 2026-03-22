@@ -1,0 +1,116 @@
+
+Final step: prepare VoiceCore for production deployment.
+
+## DOCKER CONFIGURATION
+
+### Dockerfile.backend:
+FROM python:3.11-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/ .
+EXPOSE 8000
+CMD ['uvicorn', 'main:app', '--host', '0.0.0.0', '--port', '8000', '--workers', '4']
+
+### Dockerfile.frontend:
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY frontend/package*.json .
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+FROM node:20-alpine
+COPY --from=builder /app/.next/standalone .
+EXPOSE 3000
+CMD ['node', 'server.js']
+
+### docker-compose.yml (full stack):
+services:
+  backend:
+    build: { context: ., dockerfile: Dockerfile.backend }
+    ports: ['8000:8000']
+    env_file: .env
+    depends_on: [postgres, redis]
+    restart: unless-stopped
+  frontend:
+    build: { context: ., dockerfile: Dockerfile.frontend }
+    ports: ['3000:3000']
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:8000
+    restart: unless-stopped
+  postgres:
+    image: postgres:15
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+volumes:
+  pgdata:
+
+## RAILWAY DEPLOYMENT (railway.toml):
+[build]
+builder = 'DOCKERFILE'
+dockerfilePath = 'Dockerfile.backend'
+[deploy]
+startCommand = 'uvicorn main:app --host 0.0.0.0 --port $PORT'
+healthcheckPath = '/health'
+restartPolicyType = 'ON_FAILURE'
+
+## PRODUCTION CHECKLIST — ADD ALL OF THESE:
+
+// 1. Health Check Endpoint
+GET /health → returns { status: ok, version: x.x, timestamp: ... }
+
+// 2. Rate Limiting (use slowapi)
+- Public endpoints: 100 req/minute
+- Authenticated endpoints: 1000 req/minute
+- Webhook endpoints: no limit (but validate signature)
+
+// 3. Security Headers
+- CORS: allow only voicecore.ai domain in production
+- HTTPS only: redirect HTTP to HTTPS
+- Content-Security-Policy header
+- X-Frame-Options: DENY
+
+// 4. Logging (structured JSON logs)
+import structlog
+log every: API request, voice call start/end,
+           error, agent action, payment event
+
+// 5. Monitoring
+- Add Sentry for error tracking (both frontend + backend)
+- Add basic uptime endpoint for Railway health checks
+
+// 6. Database Migrations (use Alembic)
+alembic init migrations
+# Create migration for all models
+# Add seed data for testing
+
+// 7. Background Tasks (use Celery + Redis)
+Tasks to run async (not blocking API):
+- Send WhatsApp confirmations
+- Save call transcripts to database
+- Generate analytics reports
+- Send reminder messages
+
+// 8. Stripe Billing Integration
+Plans to create in Stripe:
+- price_starter: $299/month
+- price_business: $899/month
+- price_enterprise: custom
+Webhooks to handle:
+- customer.subscription.created
+- customer.subscription.deleted
+- invoice.payment_failed
+
+## FINAL TASK:
+1. Write complete README.md with setup instructions
+2. Write .env.example with all 20+ variables
+3. Create Makefile with: make dev, make build, make deploy
+4. Add GitHub Actions CI/CD pipeline
+5. Create seed script for demo data
+
+IMPORTANT: Test everything locally with docker-compose up
+IMPORTANT: Verify all API endpoints return correct status codes
+IMPORTANT: Check mobile responsiveness of all dashboard pages

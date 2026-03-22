@@ -1,0 +1,127 @@
+# VOICECORE — ADD DENTAL VERTICAL (DentalVoice)
+
+Add the Dental specialization to the existing VoiceCore platform.
+Do NOT change any existing code — only ADD new files.
+
+## STEP 1: Create backend/features/verticals/dental/prompt.py
+
+DENTAL_SYSTEM_PROMPT = """
+You are {agent_name}, the virtual receptionist for {practice_name},
+a dental practice located in {location}.
+
+DENTAL KNOWLEDGE YOU HAVE:
+- All common procedures: cleaning, fillings, root canals, crowns,
+  veneers, teeth whitening, Invisalign, implants, extractions
+- Insurance: you understand PPO, HMO, Delta Dental, Cigna, Aetna,
+  MetLife, Guardian — ask about insurance and explain coverage simply
+- Payment: CareCredit, in-house payment plans, HSA/FSA accepted
+- Emergency protocols: toothache, broken tooth, lost crown, abscess
+  → these are URGENT, offer same-day or next-day appointments
+
+PERSONALITY:
+- Warm, calm, and reassuring — many patients are anxious about dental
+- Never say "I don't know" — say "Let me check that for you"
+- Always acknowledge pain or anxiety: "I understand that can be scary"
+- Use simple language — avoid technical terms unless patient uses them
+
+APPOINTMENT RULES:
+- New patient appointments: 90 minutes minimum
+- Cleaning: 60 minutes
+- Emergency/pain evaluation: 30-45 minutes
+- Always confirm: name, phone, date of birth, insurance carrier
+- Send WhatsApp confirmation after every booking
+
+NEVER:
+- Give specific cost quotes (say "pricing depends on your insurance")
+- Diagnose conditions ("It sounds like you might have...")
+- Recommend specific medications
+- Discuss other practices or make comparisons
+
+ALWAYS:
+- Ask "Is this your first visit with us?" at the start
+- Verify insurance before confirming appointment
+- End every call: "We look forward to seeing you, {patient_name}!"
+"""
+
+DENTAL_GREETING = "Thank you for calling {practice_name}, this is {agent_name}. Are you a new or returning patient?"
+
+DENTAL_AFTER_HOURS = "Thank you for calling {practice_name}. Our office is currently closed. Our hours are {business_hours}. For dental emergencies, please press 1. Otherwise, leave a message and we'll call you back first thing in the morning."
+
+## STEP 2: Create backend/features/verticals/dental/knowledge.py
+
+DENTAL_PROCEDURES = {
+    "cleaning": {"duration": 60, "price_range": "100-200", "insurance": "usually covered 100%"},
+    "filling": {"duration": 60, "price_range": "150-300", "insurance": "usually 80% covered"},
+    "root_canal": {"duration": 90, "price_range": "700-1500", "insurance": "usually 50-80%"},
+    "crown": {"duration": 120, "price_range": "1000-1800", "insurance": "usually 50%"},
+    "extraction": {"duration": 45, "price_range": "150-400", "insurance": "usually 80%"},
+    "implant": {"duration": 180, "price_range": "3000-5000", "insurance": "rarely covered"},
+    "whitening": {"duration": 90, "price_range": "300-800", "insurance": "not covered"},
+    "invisalign": {"duration": 60, "price_range": "3000-8000", "insurance": "partial"},
+}
+
+DENTAL_EMERGENCIES = [
+    "toothache", "tooth pain", "broken tooth", "chipped tooth",
+    "lost crown", "lost filling", "swelling", "abscess", "bleeding",
+    "knocked out tooth", "tooth fell out"
+]
+
+## STEP 3: Create backend/features/verticals/dental/tools.py
+
+Add these tools to the LLM for dental practices:
+
+tools = [
+    check_insurance_coverage(carrier, procedure),
+    book_appointment(type, patient_name, phone, dob, insurance),
+    check_availability(date, appointment_type),
+    flag_emergency(symptom),        # Triggers urgent slot + alert to dentist
+    calculate_estimate(procedure, insurance_carrier),
+    send_new_patient_forms(phone),  # Sends intake forms via WhatsApp
+    confirm_appointment(appointment_id),
+    cancel_appointment(appointment_id, reason),
+]
+
+## STEP 4: Add to backend/core/config.py
+
+VERTICALS = {
+    ...,  # existing verticals
+    "dental": {
+        "name": "DentalVoice",
+        "domain": "dentalvoice.ai",
+        "price_monthly": 399,
+        "system_prompt": DENTAL_SYSTEM_PROMPT,
+        "greeting": DENTAL_GREETING,
+        "after_hours_message": DENTAL_AFTER_HOURS,
+        "emergency_keywords": DENTAL_EMERGENCIES,
+        "industry": "dental",
+    }
+}
+
+## STEP 5: Create frontend/app/(public)/verticals/dental/page.tsx
+
+Build a landing page with:
+- Hero: "Your dental practice's 24/7 receptionist"
+- Stats: "35% of dental calls go unanswered after hours"
+- Features specific to dental:
+  * Handles new patient intake
+  * Understands insurance questions
+  * Books appointments instantly
+  * Handles dental emergencies with priority
+  * Sends patient intake forms automatically
+- Social proof: "Join 500+ dental practices"
+- CTA: "Start free trial" -> /signup?vertical=dental
+- Pain points: "Stop losing patients to voicemail"
+- Pricing: $399/month — less than one missed patient per month
+
+## STEP 6: Add vertical routing to backend
+
+In backend/features/voice/pipeline.py, add:
+
+async def get_vertical_config(company_id: str):
+    company = await db.get_company(company_id)
+    vertical = company.vertical  # "dental", "legal", etc.
+    return VERTICALS.get(vertical, VERTICALS["general"])
+
+MUST: Test with a real dental scenario before deploying
+MUST: Verify emergency detection works (say "I have a toothache")
+MUST: Verify appointment booking flow works end-to-end

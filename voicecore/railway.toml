@@ -1,0 +1,15 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile.backend"
+
+[deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckInterval = 30
+healthcheckTimeout = 10
+healthcheckRetries = 3
+restartPolicyType = "ON_FAILURE"
+restartPolicyRetries = 10
+
+[deploy.vars]
+PYTHONUNBUFFERED = "1"
